@@ -16,27 +16,49 @@
 int count = 0;
 bool on = false;
 
-#define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL )
-#define BLINK_TASK_PRIORITY     ( tskIDLE_PRIORITY + 2UL )
+#define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL ) // Set main task to highest priorety
+#define BLINK_TASK_PRIORITY     ( tskIDLE_PRIORITY + 2UL ) // Set blink task to have less priorety
 #define MAIN_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define BLINK_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
+/**
+ * Blinks the LED 10 times at 1 Hz, then delay for 500 ms
+ * 
+ * @param unused
+ */
 void blink_task(__unused void *params) {
+
+    // Halt code execution if the cyw43 initialization fails
     hard_assert(cyw43_arch_init() == PICO_OK);
+
     while (true) {
+        
+        // Set LED value
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
+        
+        // Unless count is divisible by 11 toggle LED
         if (count++ % 11) on = !on;
+
+        // 500 ms delay
         vTaskDelay(500);
+    
     }
 }
 
 void main_task(__unused void *params) {
+
     xTaskCreate(blink_task, "BlinkThread",
                 BLINK_TASK_STACK_SIZE, NULL, BLINK_TASK_PRIORITY, NULL);
     char c;
+
+    // Read a character
     while(c = getchar()) {
+
+        // Swap character's case if it is a letter
         if (c <= 'z' && c >= 'a') putchar(c - 32);
         else if (c >= 'A' && c <= 'Z') putchar(c + 32);
+        
+        // Output character
         else putchar(c);
     }
 }
@@ -47,8 +69,12 @@ int main( void )
     const char *rtos_name;
     rtos_name = "FreeRTOS";
     TaskHandle_t task;
+
+    // Create main task
     xTaskCreate(main_task, "MainThread",
                 MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRIORITY, &task);
+    
+    // Start the scheduler
     vTaskStartScheduler();
     return 0;
 }
