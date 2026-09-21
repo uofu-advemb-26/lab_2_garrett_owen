@@ -13,13 +13,16 @@
 #include "pico/multicore.h"
 #include "pico/cyw43_arch.h"
 
-int count = 0;
-bool on = false;
+#include "functions.h"
+
 
 #define MAIN_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1UL ) // Set main task to highest priorety
 #define BLINK_TASK_PRIORITY     ( tskIDLE_PRIORITY + 2UL ) // Set blink task to have less priorety
 #define MAIN_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define BLINK_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
+
+int count = 0;
+bool on = false;
 
 /**
  * Blinks the LED 10 times at 1 Hz, then delay for 500 ms
@@ -33,11 +36,12 @@ void blink_task(__unused void *params) {
 
     while (true) {
         
+
+        toggle_led(&count, &on);
+
         // Set LED value
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
-        
-        // Unless count is divisible by 11 toggle LED
-        if (count++ % 11) on = !on;
+
 
         // 500 ms delay
         vTaskDelay(500);
@@ -54,12 +58,8 @@ void main_task(__unused void *params) {
     // Read a character
     while(c = getchar()) {
 
-        // Swap character's case if it is a letter
-        if (c <= 'z' && c >= 'a') putchar(c - 32);
-        else if (c >= 'A' && c <= 'Z') putchar(c + 32);
-        
-        // Output character
-        else putchar(c);
+        putchar(switch_capitalization(c));
+
     }
 }
 
