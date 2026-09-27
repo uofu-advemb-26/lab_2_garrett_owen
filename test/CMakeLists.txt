@@ -1,4 +1,5 @@
-add_executable(mytest test.c unity_config.c)
+#add_executable(mytest test.c unity_config.c)
+add_executable(mytest function_test.c ../src/functions.c unity_config.c)
 
 target_link_libraries(mytest PRIVATE
   pico_stdlib
