@@ -1,4 +1,5 @@
-add_executable(mytest test.c unity_config.c)
+#add_executable(mytest test.c unity_config.c)
+add_executable(mytest function_test.c ../src/functions.c unity_config.c)
 
 target_link_libraries(mytest PRIVATE
   pico_stdlib
@@ -16,9 +17,10 @@ if(PICO_CYW43_SUPPORTED)
 endif()
 
 # Modify the below lines to enable/disable output over UART/USB.
-# These are mutually exclusive, only set one.
+# UART is needed for the CI runner (read through the debug probe);
+# USB is handy for local debugging. Both can be enabled at once.
 pico_enable_stdio_uart(mytest 1)
-pico_enable_stdio_usb(mytest 0)
+pico_enable_stdio_usb(mytest 1)
 
 # This will speed up the simulation, since data won't be copied from the flash controller.
 # It does make the binary non-persistent on a real microcontroller.
