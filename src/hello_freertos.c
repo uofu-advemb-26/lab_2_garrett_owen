@@ -37,10 +37,8 @@ void blink_task(__unused void *params) {
     while (true) {
         
 
+        // Toggle and set LED value
         toggle_led(&count, &on);
-
-        // Set LED value
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, on);
 
 
         // 500 ms delay

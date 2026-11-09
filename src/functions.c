@@ -18,6 +18,8 @@ void toggle_led(int *count, bool *on){
     // Unless count is divisible by 11 toggle LED
     if ((int)(*count)++ % 11) *on = !(*on);
 
+    // Set LED value
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, *on);
 
 }
 

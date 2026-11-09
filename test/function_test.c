@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <pico/stdlib.h>
 #include <stdint.h>
+#include <pico/cyw43_arch.h>
 #include <unity.h>
 #include "unity_config.h"
 
@@ -33,16 +34,19 @@ void test_switch_capitalization(){
 
 void test_toggle_led(){
     int count = 0;
-    bool on = false;
+    bool on = 0;
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
     for (int i = 0; i < 200; i += 1) {
         int curr_count = count;
         bool prev_on = on;
         toggle_led(&count, &on);
-        TEST_ASSERT_EQUAL_MESSAGE(curr_count + 1, count, "Always increment the count");
+        int gpio = cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN);
+        TEST_ASSERT_EQUAL_MESSAGE(gpio, on, "GPIO should be set to the state of 'on' variable.");
+        TEST_ASSERT_EQUAL_MESSAGE(count, curr_count +1, "Always increment the count");
         if (curr_count % 11) {
             TEST_ASSERT_NOT_EQUAL_MESSAGE(prev_on, on, "Should toggle when count is not a multiple of 11.");
         } else {
-            TEST_ASSERT_EQUAL_MESSAGE(prev_on, on, "Should not toggle when count is a multiple of 11.");
+            TEST_ASSERT_EQUAL_MESSAGE(prev_on, on, "Should not toggle otherwise.");
         }
     }
 }
@@ -51,6 +55,7 @@ void test_toggle_led(){
 int main (void)
 {
     stdio_init_all();
+    hard_assert(cyw43_arch_init() == PICO_OK);  // Required before using the LED (CYW43) GPIO
     while (1) {
         sleep_ms(5000); // Give time for TTY to attach.
         printf("Start tests\n");
